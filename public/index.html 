@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>PIXEL SHIFT</title>
+<link rel="stylesheet" href="css/reset.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/mobile.css" />
+<script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+
+  <!-- 로딩 화면 -->
+  <div id="loading-screen">
+    <div class="title-logo">PIXEL SHIFT</div>
+    <div class="loading-bar-track"><div class="loading-bar-fill" id="loading-fill"></div></div>
+    <div class="loading-label">LOADING...</div>
+  </div>
+
+  <!-- 가로 화면 안내 -->
+  <div id="rotate-notice">
+    <div class="rotate-icon"></div>
+    <div>세로 화면으로 플레이해 주세요.</div>
+  </div>
+
+  <!-- 게임 캔버스 -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD (플레이 중) -->
+  <div id="hud" class="hidden">
+    <div id="hud-stage">STAGE 01 <span id="hud-stars">☆☆☆</span></div>
+  </div>
+
+  <!-- 조작 UI (플레이 중) -->
+  <div id="controls" class="hidden">
+    <div id="cam-zone"></div>
+    <div id="joystick-zone">
+      <div class="joystick-base"></div>
+      <div class="joystick-stick" id="joystick-stick"></div>
+    </div>
+    <div id="top-right-buttons">
+      <button class="icon-btn" id="btn-pause">II</button>
+      <button class="icon-btn" id="btn-reset">↺</button>
+    </div>
+    <div id="angle-indicator">0°</div>
+  </div>
+
+  <!-- 타이틀 화면 -->
+  <div id="screen-title" class="screen hidden">
+    <div class="title-logo">PIXEL SHIFT</div>
+    <div class="title-tagline">눈을 믿지 마라.</div>
+    <div class="menu-list">
+      <button class="menu-btn primary" data-action="start">게임 시작</button>
+      <button class="menu-btn" data-action="tutorial">튜토리얼</button>
+      <button class="menu-btn" data-action="ranking">랭킹</button>
+      <button class="menu-btn" data-action="friends">친구</button>
+      <button class="menu-btn" data-action="settings">설정</button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
