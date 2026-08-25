@@ -1,0 +1,32 @@
+/* 100vh 문제 대응: JS에서 --vh 커스텀 속성을 실시간으로 갱신한다 */
+#app {
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+@media (orientation: landscape) {
+  #rotate-warning.orientation-active {
+    display: flex;
+  }
+}
+
+@media (max-width: 380px) {
+  .pixel-title {
+    font-size: 26px;
+  }
+  .stage-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 415px) {
+  .panel, .list, .tabs {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+}
+
+input, textarea {
+  font-size: 16px !important; /* iOS 자동 확대 방지 */
+}
