@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>PIXEL SHIFT</title>
+<link rel="stylesheet" href="css/reset.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/mobile.css" />
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="pixel-title" style="font-size:24px;">PIXEL SHIFT</div>
+  <div class="pixel-sub" id="loading-label">LOADING...</div>
+  <div class="loading-bar-track"><div class="loading-bar-fill" id="loading-bar"></div></div>
+</div>
+
+<div id="rotate-warning">
+  <div class="rotate-icon">📱</div>
+  <div>세로 화면으로 플레이해 주세요.</div>
+</div>
+
+<div id="app">
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- HUD (게임 플레이 중) -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div id="hud-stage-name">STAGE 1</div>
+      <div id="hud-timer">00.00s</div>
+      <button class="pause-btn" id="btn-pause">PAUSE</button>
+    </div>
+    <div class="hud-hint" id="hud-hint"></div>
+
+    <div id="joystick-zone">
+      <div id="joystick-base">
+        <div id="joystick-stick"></div>
+      </div>
+    </div>
+    <div id="camera-zone"></div>
+
+    <div class="hud-buttons">
+      <button id="btn-camera-reset">CAMERA<br/>RESET</button>
+      <button id="btn-reset">RESET</button>
+    </div>
+  </div>
+
+  <!-- 실패 오버레이 -->
+  <div class="overlay-center" id="screen-fail">
+    <div class="overlay-title fail">떨어졌습니다.</div>
+    <div class="pixel-sub" id="fail-hint" style="margin-bottom:20px;"></div>
+    <div class="overlay-actions">
+      <button class="btn primary" id="btn-retry-fail">다시 시도</button>
+    </div>
+  </div>
+
+  <!-- 클리어 오버레이 -->
+  <div class="overlay-center" id="screen-clear">
+    <div class="overlay-title clear">STAGE CLEAR</div>
+    <div class="clear-stats">
+      <div class="row"><span>시간</span><span id="clear-time">-</span></div>
+      <div class="row"><span>재시도</span><span id="clear-attempts">-</span></div>
+      <div class="row"><span>점수</span><span id="clear-score">-</span></div>
+      <div class="row"><span>등급</span><span id="clear-stars" class="stars">-</span></div>
+    </div>
+    <div class="overlay-actions">
+      <button class="btn primary" id="btn-next-stage">다음 스테이지</button>
+      <button class="btn" id="btn-replay-stage">다시 플레이</button>
+      <button class="btn" id="btn-clear-home">홈</button>
+    </div>
+  </div>
+
+  <!-- 일시정지 -->
+  <div class="overlay-center" id="screen-pause">
+    <div class="overlay-title">PAUSED</div>
+    <div class="overlay-actions">
+      <button class="btn primary" id="btn-resume">계속하기</button>
+      <button class="btn" id="btn-restart">다시 시작</button>
+      <button class="btn danger" id="btn-quit">나가기</button>
+    </div>
+  </div>
+
+  <!-- 메인 메뉴 -->
+  <div class="screen active" id="screen-menu">
+    <div style="flex:1;"></div>
+    <div class="menu-wrap">
+      <div class="pixel-title">PIXEL SHIFT</div>
+      <div class="pixel-sub" style="margin-bottom:20px;">눈을 믿지 마라.</div>
+      <button class="btn primary" id="btn-menu-start">게임 시작</button>
+      <button class="btn" id="btn-menu-stages">스테이지</button>
+      <button class="btn" id="btn-menu-tutorial">튜토리얼</button>
+      <button class="btn" id="btn-menu-ranking">랭킹</button>
+      <button class="btn" id="btn-menu-friends">친구</button>
+      <button class="btn" id="btn-menu-settings">설정</button>
+      <div class="link-text" id="menu-auth-link">로그인 / 회원가입</div>
+    </div>
+  </div>
+
+  <!-- 로그인 -->
+  <div class="screen screen-scroll" id="screen-login">
+    <button class="back-btn" data-back="screen-menu">← 뒤로</button>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+      <div class="pixel-title" style="font-size:22px;">LOGIN</div>
+      <div class="panel">
+        <div class="field">
+          <label>닉네임</label>
+          <input type="text" id="login-username" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label>비밀번호</label>
+          <input type="password" id="login-password" autocomplete="current-password" />
+        </div>
+        <div class="error-text" id="login-error"></div>
+        <button class="btn primary" id="btn-login-submit">로그인</button>
+      </div>
+      <div class="link-text" id="go-register">계정이 없나요? 회원가입</div>
+    </div>
+  </div>
+
+  <!-- 회원가입 -->
+  <div class="screen screen-scroll" id="screen-register">
+    <button class="back-btn" data-back="screen-login">← 뒤로</button>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+      <div class="pixel-title" style="font-size:22px;">SIGN UP</div>
+      <div class="panel">
+        <div class="field">
+          <label>닉네임 (3~16자)</label>
+          <input type="text" id="register-username" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label>비밀번호 (8자 이상)</label>
+          <input type="password" id="register-password" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label>비밀번호 확인</label>
+          <input type="password" id="register-password2" autocomplete="new-password" />
+        </div>
+        <div class="error-text" id="register-error"></div>
+        <button class="btn primary" id="btn-register-submit">회원가입</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 스테이지 선택 -->
+  <div class="screen" id="screen-stage-select">
+    <button class="back-btn" data-back="screen-menu">← 뒤로</button>
+    <div class="top-bar" style="justify-content:center;"><div class="title-sm">STAGE SELECT</div></div>
+    <div class="stage-grid" id="stage-grid"></div>
+  </div>
+
+  <!-- 랭킹 -->
+  <div class="screen" id="screen-ranking">
+    <button class="back-btn" data-back="screen-menu">← 뒤로</button>
+    <div class="top-bar" style="justify-content:center;"><div class="title-sm">RANKING</div></div>
+    <div class="tabs">
+      <div class="tab active" data-rank-tab="global">전체</div>
+      <div class="tab" data-rank-tab="weekly">주간</div>
+      <div class="tab" data-rank-tab="stage">스테이지</div>
+      <div class="tab" data-rank-tab="friends">친구</div>
+    </div>
+    <div class="list" id="ranking-list"></div>
+    <div class="pagination" id="ranking-pagination">
+      <button class="btn small" id="rank-prev">&lt; 이전</button>
+      <span id="rank-page-label">1 / 1</span>
+      <button class="btn small" id="rank-next">다음 &gt;</button>
+    </div>
+    <div class="my-rank-bar" id="my-rank-bar">내 순위: - / 내 점수: -</div>
+  </div>
+
+  <!-- 친구 -->
+  <div class="screen" id="screen-friends">
+    <button class="back-btn" data-back="screen-menu">← 뒤로</button>
+    <div class="top-bar" style="justify-content:center;"><div class="title-sm">FRIENDS</div></div>
+    <div class="tabs">
+      <div class="tab active" data-friend-tab="list">친구 목록</div>
+      <div class="tab" data-friend-tab="requests">요청</div>
+      <div class="tab" data-friend-tab="search">검색</div>
+    </div>
+
+    <div id="friend-search-box" class="panel" style="display:none;">
+      <div class="field">
+        <label>친구 검색</label>
+        <input type="text" id="friend-search-input" placeholder="닉네임 입력" />
+      </div>
+      <button class="btn primary" id="btn-friend-search">검색</button>
+    </div>
+
+    <div class="list" id="friends-list"></div>
+  </div>
+
+  <!-- 설정 -->
+  <div class="screen" id="screen-settings">
+    <button class="back-btn" data-back="screen-menu">← 뒤로</button>
+    <div class="top-bar" style="justify-content:center;"><div class="title-sm">SETTINGS</div></div>
+    <div style="margin-top:40px;">
+      <div class="settings-row">
+        <span>사운드</span>
+        <div class="toggle on" id="toggle-sound"><div class="knob"></div></div>
+      </div>
+      <div class="settings-row">
+        <span>효과음</span>
+        <div class="toggle on" id="toggle-sfx"><div class="knob"></div></div>
+      </div>
+      <div class="settings-row">
+        <span>진동</span>
+        <div class="toggle on" id="toggle-vibration"><div class="knob"></div></div>
+      </div>
+      <div class="settings-row">
+        <span>카메라 감도</span>
+        <input type="range" class="slider" id="slider-sensitivity" min="1" max="10" value="5" />
+      </div>
+      <div class="settings-row">
+        <span>그래픽</span>
+        <select id="select-graphics" style="background:#05060a;color:#eef2f8;border:2px solid #2a2f3d;padding:6px;">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM" selected>MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+        </select>
+      </div>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="padding:16px;">
+      <button class="btn danger" id="btn-logout">로그아웃</button>
+    </div>
+  </div>
+
+  <!-- 튜토리얼 오버레이 텍스트 -->
+  <div class="overlay-center" id="screen-tutorial-intro">
+    <div class="overlay-title">TUTORIAL</div>
+    <div class="pixel-sub" style="margin-bottom:20px;">플레이하면서 직접 배워봅니다.</div>
+    <div class="overlay-actions">
+      <button class="btn primary" id="btn-tutorial-begin">시작</button>
+      <button class="btn" id="btn-tutorial-skip">건너뛰기</button>
+    </div>
+  </div>
+
+  <div id="offline-banner">온라인 기능을 사용할 수 없습니다. 인터넷 연결을 확인하세요.</div>
+  <div id="toast"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/input.js"></script>
+<script src="js/illusion.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/camera.js"></script>
+<script src="js/player.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/game.js"></script>
+<script src="js/friends.js"></script>
+<script src="js/ranking.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
