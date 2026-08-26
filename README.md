@@ -227,4 +227,4 @@ curl -b cookies.txt -X POST http://localhost:3000/api/stages/1/complete \
 curl -b cookies.txt "http://localhost:3000/api/ranking/global"
 ```
 
-앱 내 체크리스트: 회원가입 → 로그인 → 튜토리얼 → 스테이지 클리어 → 랭킹 확인 → 사용자 검색 → 친구 요청/수락 → 친구 랭킹 비교 → 로그아웃.
+앱 내 체크리스트: 회원가입 → 로그인 → 튜토리얼 → 스테이지 클리어 → 랭킹 확인 → 사용자 검색 → 친구 요청/수락 → 친구 랭킹 비교 → 로그아웃
