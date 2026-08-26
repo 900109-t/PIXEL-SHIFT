@@ -21,7 +21,7 @@
 - 스테이지별 최고 기록 저장, 서버 측 점수 계산/위변조 방지
 - 전체/주간/스테이지/친구 랭킹 (DB 페이지네이션)
 - 친구 검색/요청/수락/거절/삭제
-- Rate Limit, 입력 검증, 오프라인 안내, 전역 오류 처리
+- Rate Limit (Upstash Redis 기반, 키 없으면 인메모리로 자동 fallback), 입력 검증, 오프라인 안내, 전역 오류 처리
 
 ## 3. 기술 스택
 
@@ -29,6 +29,7 @@
 - Backend: Node.js, Express.js
 - DB: PostgreSQL + Prisma ORM
 - Auth: bcryptjs, JWT + HTTP-only Cookie
+- Rate Limit: Upstash Redis (`@upstash/ratelimit`), 인메모리 fallback
 - Deploy: Railway
 
 ## 4. 프로젝트 구조
@@ -112,6 +113,8 @@ npm run db:seed
 | `PORT` | 서버 포트 (Railway는 자동 주입) |
 | `NODE_ENV` | development / production |
 | `DEV_MODE` | true일 때 전체 스테이지 해금 등 개발 기능 활성화 |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST URL (Rate Limit용, 비우면 인메모리로 자동 전환) |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST Token |
 
 ## 11. Railway 배포
 
@@ -119,7 +122,8 @@ npm run db:seed
 **STEP 2** [railway.app](https://railway.app) 접속 → New Project
 **STEP 3** "Deploy from GitHub repo" 선택, 이 저장소 연결 (App Service 생성)
 **STEP 4** 같은 프로젝트에 "New" → "Database" → "PostgreSQL" 추가
-**STEP 5** App Service → Variables 탭에서 아래 입력:
+**STEP 5** [Upstash](https://upstash.com) 에서 무료 Redis 데이터베이스를 하나 만들고, "REST API" 탭에서 `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` 값을 복사 (Railway Marketplace에도 Upstash Redis 템플릿이 있어 프로젝트 안에서 바로 추가할 수 있습니다)
+**STEP 6** App Service → Variables 탭에서 아래 입력:
 
 ```
 NODE_ENV=production
@@ -127,14 +131,16 @@ JWT_SECRET=...
 COOKIE_SECRET=...
 DEV_MODE=false
 DATABASE_URL=${{Postgres.DATABASE_URL}}
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
 ```
 
-(`Postgres`는 실제 DB 서비스 이름에 맞게 수정)
+(`Postgres`는 실제 DB 서비스 이름에 맞게 수정. Upstash를 Railway Marketplace로 추가했다면 `${{Upstash.UPSTASH_REDIS_REST_URL}}` 형태의 변수 참조도 가능합니다)
 
-**STEP 6** Deploy 실행 (자동 트리거 또는 수동 Deploy)
-**STEP 7** Deployments 탭에서 로그 확인
-**STEP 8** App Service → Settings → Networking → "Generate Domain"으로 Public Domain 생성
-**STEP 9** 최초 배포 후 마이그레이션 실행 (Railway CLI 사용):
+**STEP 7** Deploy 실행 (자동 트리거 또는 수동 Deploy)
+**STEP 8** Deployments 탭에서 로그 확인
+**STEP 9** App Service → Settings → Networking → "Generate Domain"으로 Public Domain 생성
+**STEP 10** 최초 배포 후 마이그레이션 실행 (Railway CLI 사용):
 
 ```bash
 railway login
@@ -170,6 +176,7 @@ App Service → Settings → Networking에서 "Generate Domain" 클릭 시 `*.up
 | 환경변수 누락 | 서버가 production에서 필수 변수 누락 시 즉시 종료하며 로그에 누락 목록 출력 |
 | 서비스 Crash | Deployments → 로그 확인, DB 연결/환경변수 우선 점검 |
 | Public Domain 없음 | Networking 탭에서 수동으로 Generate Domain 필요 |
+| Rate Limit이 인스턴스마다 따로 도는 것 같음 | `UPSTASH_REDIS_REST_URL`/`TOKEN` 미설정 시 인메모리로 동작 — Railway에서 인스턴스가 여러 개면 반드시 Upstash 연결 필요 |
 
 ## 16. API 목록
 
